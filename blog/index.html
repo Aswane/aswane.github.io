@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aswane | Blog</title>
+    <meta name="description" content="Introduction à l'analyse d'un dump avec volatility. Analyse de la détection de malware comme Ursnif">
+    <title>Introduction à l'analyse d'un dump avec volatility | Forensic | Aswane's Blog</title>
 
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../../css/style.css">
 </head>
 <body>
+    
+
+
 <div class="page-wrapper">
     <header>
         <div class="nav-wrapper">
@@ -27,33 +31,130 @@
         </div>
     </header>
         
-    <section class="headline">
-        <div class="svg-wrapper">
-            <svg height="60" width="320">
-              <rect class="shape" height="60" width="320" />
-            </svg>
-             <div class="text"><div id="typedtext"></div></div>
-          </div>
+
+    <section class="about-container">
+            <article class="stack__card">
+              <!-- <figure class=""> <img src="/images/logo_aswane.jpg" class="card__img" alt="">
+               
+              </figure> -->
+
+            <div class="about-content">
+                <h1 class="blog-h1">Introduction à l'analyse forensic avec Volatility</h1>
+                <p>
+                    J'ai toujours eu envie d'analyser une machine windows compromise par un malware, c'est donc ce que nous allons faire aujourd'hui ! Pour commencer, j'ai installé une machine virtuelle windows 7 puis je l'ai configuré<br>( J'allais pas installer ursnif sur mon propre pc :p )
+                </p>
+                <img src="/images/vm-windows.PNG">
+                <p>
+                    Avant d'injecter le malware Ursnif, je vais vous présenter les bases de volatility ^^. En premier Hop je suspends la vm et récupére le .vmem ( C'est un fichier contenant le dump de la mémoire vive de la VM ).<br>
+                    On commence avec une petite Introduction au base de volatility :<br><br>
+                    <code class="code">vol.exe -f win7.vmem imageinfo</code>
+                </p>
+                <img src="/images/image-info.PNG">
+                <p>
+                    Le plugin imageinfo nous permet d'avoir les informations importantes sur le dump mémoire.
+                    On remarque donc que volatility nous suggère plusieurs profile, Win7SP1x64, Win7SP0x64 ... Je choisis le premier pour continuer mon analyse.<br>
+                    Si vous voulez fouiller dans les registres vous pouvez utiliser le plugin hivelist<br>
+                    Je vous invite à vous renseigner sur la documentation de <a target="_blank" href="https://github.com/volatilityfoundation/volatility/wiki/Command-Reference">Volatility</a> pour découvrir tous les plugins disponibles<br>
+                    <code class="code">vol.exe -f win7.vmem --profile=Win7SP1x64 hivelist</code>
+                    <br>
+                </p>
+                <img src="../../images/hivelist.PNG" alt="">
+                <p>
+                    On y voit donc les adresses virtuelles des registres, vous pouvez y accéder en utilisant <br><code class="code">vol.exe -f win7.vmem --profile=Win7SP1x64 printkey -o adresse-virtuelle -K 'votre registre'</code>  en spécifiant la clé de registre à laquelle vous souhaitez
+                    accéder.<br>
+                    Un autre plugin, qui peut être très utile est le plugin hashdump, il permet de récupérer le hash des utilisateurs :
+                </p>
+                <img src="../../images/hashdump.PNG" alt="">
+                <p>
+                    Et voilà, c'est pas compliqué :p. Bon je t'arrête tout de suite, ranges ton hashcat John, le mot de passe c'est "password".<br>
+                    Un plugin lui aussi très utile, est cmdline, il est permet de voir toutes les commandes en cours lors du dump de la ram avec son pid.<br>
+                    <br>
+                    <code class="code">vol.exe -f win7.vmem --profile=Win7SP1x64 cmdline</code>
+                </p>
+                <img src="../../images/cmdline1.PNG" alt="">
+                <img src="../../images/cmdline2.png" alt="">
+                <p>Ahh apparament L'explorer windows est ouvert !</p>
+                <img src="../../images/cmdline3.png" alt="">
+                <p>Je remarque aussi que Internet Explorer et le CMD sont lancé, allons vérifier ça !</p>
+                <img src="../../images/vim-windows-gui.PNG"alt="">
+                <p>Et oui ! Internet Explorer, L'explorer windows et le CMD. Tout y est ! 
+                    <br>
+                Je pense que vous avez compris le fonctionnement de volatility. J'espère (╯°□°）╯︵ ┻━┻)    
+                </p>
+                <h1 class="blog-h1">Retrouver les traces d'un malware ( Ursnif )</h1>
+                <p>Maintenant passons aux choses sérieuses ^^,
+                   et j'espère que vous avez compris à quel point Volatility peut être est puissant. Plus de 60 plugins, vous permettant de trouver votre bonheur avec votre dump.<br>
+                <!-- <div class="p-30"></div> --> J'ai donc injecter dans ma VM windows 7 le malware ursnif 
+                ( Le sample est disponible en téléchargement <a href="https://repo.aassfxxx.infos.st/misc/malware/ursnif/ursnif_1002.zip" target="_blank">ici</a>, merci à aaSSfxxx ).<br>
+                    J'ai redémarré ma VM et récupérer le .vmem de celle ci ( je rappelle qu'un .vmem est un fichier contenant la mémoire vive de la machine virtuelle )<br>
+                    Pour commencer l'analyse, j'utilise le plugin netscan qui permet de lister les connexion TCP/UDP et leur PID.<br>
+                    <code class="code">python volatility/vol.py -f win7_infected.vmem --profile=Win7SP1x64 netscan</code> ( Oui je suis passé sur ma kali ^^ )
+                </p>
+                <img src="../../images/netscan_hg.png" alt="">
+                <p>
+                    Je remarque donc plusieurs connexions suspectes, 4 connexions effectuées par l'explorer.exe dont le PID est 2132. J'effectue alors un pslist pour lister les processus.<br>
+                    <code class="code">
+                        python volatility/vol.py -f win7_infected.vmem --profile=Win7SP1x64 pslist
+                    </code>
+                </p>
+                <img src="../../images/pslist_ursnif.PNG" alt="">
+                <p>Hmm, bizarre, Le processus parent (PPID) de notre processus suspect n'existe pas. Il y a donc de grand chance que le processus a qui appartient le PID 2132 soit notre petit Ursnif
+                    <br>
+                    Pour vérifier si Ursnif ce cache bien dans ce PID, je vais installer le plugin <a href="https://github.com/JPCERTCC/MalConfScan" target="_blank">MalConfScan</a>, 
+                    c'est un plugin de volatility permettant de retrouver un malware dans votre dump ( si celui-ci est connue ). Pour l'installer : <br>
+                    <code class="code">
+                         git clone https://github.com/JPCERTCC/MalConfScan.git<br>
+                        &nbsp&nbsp pip install -r MalConfScan/requirements.txt<br>
+                        &nbsp&nbsp cd MalConfScan<br>
+                        &nbsp&nbsp cp -R malconfscan.py utils yara [DossierDeVotre Volatility]/volatility/plugin/malware<br>
+                    </code>
+                </p>
+                <div class="m--50"></div>
+                <p>
+                    Ensuite pour utiliser ce plugin il faut juste l'appeler et spécifier le pid. Hop Hop Hop J'essaie !<br>
+                    <code class="code">
+                        python volatility/vol.py -f win7_infected.vmem --profile=Win7SP1x64 malconfscan -p 2132
+                    </code>
+                </p>
+                <img src="../../images/malconfscan_hg.png" alt="">
+                <p>
+                    Et voilà, maintenant je suis sûr que Ursnif est bien caché dans le PID 2132 :p dans le processus de l'explorer windows !<br>
+                    Si vous voulez avoir plus d'information sur un processus, vous pouvez installer un plugin nommé psinfo :<br>
+                    <code class="code">
+                    Aller dans le répertoire de volatility<br>
+                    &nbsp&nbspcd volatility/plugins/<br>
+                    &nbsp&nbspwget https://raw.githubusercontent.com/monnappa22/Psinfo/master/psinfo.py<br>
+                </code><br>
+                Puis utiliser la commande suivante :<br>
+                <code class="code">
+                    python volatility/vol.py -f win7_infected.vmem --profile=Win7SP1x64 psinfo -p 2132
+                </code>
+                </p>
+                <img src="../../images/psinfo.PNG" alt="">
+                <p>
+                    Et on voit distinctement que le programme exécuté est encore une fois bien l'explorateur windows et on voit aussi le chemin de l'exécutable ! Parfait.<br>
+                    Une autre manière de récupérer son chemin est d'utiliser le plugin cmdline : 
+                </p>
+                <img src="../../images/cmdline4.PNG" alt="">
+                <p>
+                    Bon maintenant que on connait le PID du méchant malware, il nous reste juste une dernière chose à faire qui est de dumper l'exécutable contenant Ursnif. C'est à dire récupérer
+                    le programme contenant notre petit malware pour permettre une analyse par la suite.<br>
+                    Pour cela, je vais utiliser le plugin nommé procdump :
+                </p>
+                <img src="../../images/procdump.PNG" alt="">
+                <p>
+                    Et voilà, j'ai récupérer l'exécutable que ursnif a infecté. Si vous ne trouver pas l'exploreur windows en tant que processus infecté cela est tout à fait normal. Ursnif 
+                    s'injecte 
+                    principalement dans Internet Explorer étant donné qu'une de ses fonctions est le vol bancaire. Pour ma part il s'est injecter dans l'explorer windows.<br>
+                    Voilà, mon premier article se termine. Je tiens à remercier <a href="https://aassfxxx.infos.st/" target="_blank">aaSSfxxx</a> pour le sample utilisé lors de cette article.
+                     Vous pouvez le télécharger <a href="https://repo.aassfxxx.infos.st/misc/malware/ursnif/ursnif_1002.zip" target="_blank">ici</a> ( mot de passe : infected et le sample 
+                     est 1002.bin). Et n'hésiter pas à aller voir ses articles sur <a href="http://aassfxxx.infos.st/ursnif-analyse-du-loader.html" target="_blank">l'analyse d'ursnif</a>.
+                     <br>
+                     Sur ce, je vous souhaite une bonne journée et de chouettes analyses de vos dumps :p
+
+                </p>
+            </div>
     </section>
-    <section class="features">
-        <div class="feature-container">
-            <img src="../images/logo_aswane.jpg" alt="">
-            <h2>Soon ^^</h2>
-            <p>Soon :p</p>
-        </div>
-        <div class="feature-container">
-            <img src="../images/logo_aswane.jpg" alt="">
-            <h2>Soon ^^</h2>
-            <p>Soon :p</p>
-        </div>
-        <div class="feature-container">
-            <img src="../images/logo_aswane.jpg" alt="">
-            <h2>Soon ^^</h2>
-            <p>Soon :p</p>
-        </div>
-    </section>
-    </section>
-</div>
 
 <!-- FOOTER START -->
 <div class="footer">
@@ -66,13 +167,16 @@
             <li><a href="https://hacktion.be/" target="_blank">Que20</a></li>
             <li><a href="https://github.com/lulz3xploit/" target="_blank">0wnes1s</a></li>
             <li><a href="https://astatesec.github.io/" target="_blank">Astate</a></li>
+            <li><a href="https://http://inf0sec.fr" target="_blank">Unknow101</a></li>
+            <li><a href="http://real-asm.infos.st" target="_blank">Real-Asm</a></li>
         </ul>
     </div>
 </div>
+
 <!-- Jquery needed -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-<script src="../javascript/navbarscript.js"></script>
-
-<script src="../javascript/typpedscript1.js"></script>
+<script src="../../javascript/navbarscript.js"></script>
+<script src="../../javascript/typpedscript_about_title.js"></script>
+<script src="../../javascript/typpedscript1.js"></script>
 </body>
 </html>
