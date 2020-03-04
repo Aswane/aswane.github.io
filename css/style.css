@@ -350,6 +350,16 @@ animation: 0.5s draw linear forwards;
     width: 100%;
   -o-object-fit: cover;
     object-fit: cover;
+
+
+}
+
+
+
+img.anim {
+  width: 100%;
+  -o-object-fit: cover;
+    object-fit: cover;
   -webkit-transform: scale(1);
   -ms-transform: scale(1);
   transform: scale(1);
@@ -357,12 +367,11 @@ animation: 0.5s draw linear forwards;
   -o-transition: all 0.3s ease-in-out;
   transition: all 0.3s ease-in-out;
 }
-
-img:hover {
-    -webkit-transform: scale(1.05);
-    -ms-transform: scale(1.05);
-    transform: scale(1.05);
-  }
+img.anim:hover {
+  -webkit-transform: scale(1.05);
+  -ms-transform: scale(1.05);
+  transform: scale(1.05);
+}
 
   @import 'https://fonts.googleapis.com/css?family=Roboto+Mono:100';
 
@@ -510,4 +519,80 @@ background-color: #333;
         list-style: none;
         padding: 10px;
     }
+}
+
+code.code {
+  padding: 10px;
+  color: #000;
+  border-radius: 5px;
+}
+
+code.no-code {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    margin-left: 25%;
+}
+
+.p-5 {
+  padding: 5px;
+}
+
+.p-10 {
+    padding: 10px;
+}
+.p-20 {
+    padding: 20px;
+}
+.p-30 {
+    padding: 30px;
+}
+.p-40 {
+    padding: 40px;
+}
+.p-50 {
+    padding: 50px;
+}
+.p-60 {
+    padding: 60px;
+}
+
+.m--5 {
+  margin: -5px;
+}
+
+.m--10 {
+  margin: -10px;
+}
+
+.m--20 {
+  margin: -20px;
+}
+
+.m--30 {
+  margin: -30px;
+}
+
+.m--40 {
+  margin: -40px;
+}
+
+.m--50 {
+  margin: -50px;
+}
+
+
+a{
+    text-decoration: none;
+    color: rgb(15, 14, 14);
+    transition: color 0.3s ease-out;
+}
+
+a:hover {
+    color: #3498db;
+}
+
+
+h1.blog-h1 {
+  font-size: 3em;
 }
