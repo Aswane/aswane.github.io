@@ -41,32 +41,38 @@
             <div class="about-content">
                 <h1 class="blog-h1">Introduction à l'analyse forensic avec Volatility</h1>
                 <p>
-                    J'ai toujours eu envie d'analyser une machine windows compromise par un malware, c'est donc ce que nous allons faire aujourd'hui ! Pour commencer, j'ai installé une machine virtuelle windows 7 puis je l'ai configuré<br>( J'allais pas installer ursnif sur mon propre pc :p )
+                    J'ai toujours eu envie d'analyser une machine windows compromise par un malware, c'est donc ce que nous allons faire aujourd'hui ! Pour commencer,
+                     j'ai installé une machine virtuelle windows 7 puis je l'ai configuré<br>( J'allais pas installer ursnif sur mon propre pc ).
                 </p>
                 <img src="/images/vm-windows.PNG">
                 <p>
-                    Avant d'injecter le malware Ursnif, je vais vous présenter les bases de volatility ^^. En premier Hop je suspends la vm et récupére le .vmem ( C'est un fichier contenant le dump de la mémoire vive de la VM ).<br>
+                    Avant d'injecter le malware Ursnif, je vais vous présenter les bases de volatility. En premier Hop je suspends la vm et récupére le .vmem (
+                         c'est un fichier que créer VMware permettant de recupérer la mémoire vive de la VM facilement ).<br>
                     On commence avec une petite Introduction au base de volatility :<br><br>
                     <code class="code">vol.exe -f win7.vmem imageinfo</code>
                 </p>
                 <img src="/images/image-info.PNG">
                 <p>
                     Le plugin imageinfo nous permet d'avoir les informations importantes sur le dump mémoire.
-                    On remarque donc que volatility nous suggère plusieurs profile, Win7SP1x64, Win7SP0x64 ... Je choisis le premier pour continuer mon analyse.<br>
+                    On remarque donc que volatility nous suggère plusieurs profiles, Win7SP1x64, Win7SP0x64 ... Je choisis le premier pour continuer mon analyse.<br>
                     Si vous voulez fouiller dans les registres vous pouvez utiliser le plugin hivelist<br>
-                    Je vous invite à vous renseigner sur la documentation de <a target="_blank" href="https://github.com/volatilityfoundation/volatility/wiki/Command-Reference">Volatility</a> pour découvrir tous les plugins disponibles<br>
+                    Je vous invite à vous renseigner sur la documentation de <a target="_blank" href="https://github.com/volatilityfoundation/volatility/wiki/Command-Reference">Volatility</a>
+                     pour découvrir tous les plugins disponible<br>
                     <code class="code">vol.exe -f win7.vmem --profile=Win7SP1x64 hivelist</code>
                     <br>
                 </p>
                 <img src="../../../images/hivelist.PNG" alt="">
                 <p>
-                    On y voit donc les adresses virtuelles des registres, vous pouvez y accéder en utilisant <br><code class="code">vol.exe -f win7.vmem --profile=Win7SP1x64 printkey -o adresse-virtuelle -K 'votre registre'</code>  en spécifiant la clé de registre à laquelle vous souhaitez
+                    On y voit donc les adresses virtuelles des registres, vous pouvez y accéder en utilisant <br>
+                    <code class="code">vol.exe -f win7.vmem --profile=Win7SP1x64 printkey -o adresse-virtuelle -K 'votre registre'</code>  
+                    et en spécifiant la clé du registre à lequel vous souhaitez
                     accéder.<br>
-                    Un autre plugin, qui peut être très utile est le plugin hashdump, il permet de récupérer le hash des utilisateurs :
+                    Un autre plugin, qui peut être très utile est le plugin hashdump, il permet de récupérer le hash des utilisateurs :<br>
+                    <code class="code">vol.exe -f win7.vmem --profile=Win7SP1x64 hashdump</code>
                 </p>
                 <img src="../../../images/hashdump.PNG" alt="">
                 <p>
-                    Et voilà, c'est pas compliqué :p. Bon je t'arrête tout de suite, ranges ton hashcat John, le mot de passe c'est "password".<br>
+                    Et voilà, c'est pas compliqué. Bon je t'arrête tout de suite, ranges ton hashcat John, le hash équivaut à "password".<br>
                     Un plugin lui aussi très utile, est cmdline, il est permet de voir toutes les commandes en cours lors du dump de la ram avec son pid.<br>
                     <br>
                     <code class="code">vol.exe -f win7.vmem --profile=Win7SP1x64 cmdline</code>
@@ -75,19 +81,19 @@
                 <img src="../../../images/cmdline2.png" alt="">
                 <p>Ahh apparament L'explorer windows est ouvert !</p>
                 <img src="../../../images/cmdline3.png" alt="">
-                <p>Je remarque aussi que Internet Explorer et le CMD sont lancé, allons vérifier ça !</p>
+                <p>Je remarque aussi que Internet Explorer et le CMD sont lancés, allons vérifier ça !</p>
                 <img src="../../../images/vim-windows-gui.PNG"alt="">
                 <p>Et oui ! Internet Explorer, L'explorer windows et le CMD. Tout y est ! 
                     <br>
                 Je pense que vous avez compris le fonctionnement de volatility. J'espère (╯°□°）╯︵ ┻━┻)    
                 </p>
                 <h1 class="blog-h1">Retrouver les traces d'un malware ( Ursnif )</h1>
-                <p>Maintenant passons aux choses sérieuses ^^,
+                <p>Maintenant passons aux choses sérieuses,
                    et j'espère que vous avez compris à quel point Volatility peut être est puissant. Plus de 60 plugins, vous permettant de trouver votre bonheur avec votre dump.<br>
-                <!-- <div class="p-30"></div> --> J'ai donc injecter dans ma VM windows 7 le malware ursnif 
-                ( Le sample est disponible en téléchargement <a href="https://repo.aassfxxx.infos.st/misc/malware/ursnif/ursnif_1002.zip" target="_blank">ici</a>, merci à aaSSfxxx ).<br>
-                    J'ai redémarré ma VM et récupérer le .vmem de celle ci ( je rappelle qu'un .vmem est un fichier contenant la mémoire vive de la machine virtuelle )<br>
-                    Pour commencer l'analyse, j'utilise le plugin netscan qui permet de lister les connexion TCP/UDP et leur PID.<br>
+                <!-- <div class="p-30"></div> --> J'ai donc injecté dans ma VM windows 7 le malware ursnif 
+                ( le sample est disponible en téléchargement <a href="http://repo.aassfxxx.infos.st/misc/malware/ursnif/" target="_blank">ici</a>, merci à aaSSfxxx ).<br>
+                    J'ai redémarré ma VM et récupéré le .vmem de celle ci ( je rappelle qu'un .vmem est un fichier contenant la mémoire vive de la machine virtuelle )<br>
+                    Pour commencer l'analyse, j'utilise le plugin netscan qui permet de lister les connexions TCP/UDP et leur PID.<br>
                     <code class="code">python volatility/vol.py -f win7_infected.vmem --profile=Win7SP1x64 netscan</code> ( Oui je suis passé sur ma kali ^^ )
                 </p>
                 <img src="../../../images/netscan_hg.png" alt="">
@@ -118,8 +124,8 @@
                 </p>
                 <img src="../../../images/malconfscan_hg.png" alt="">
                 <p>
-                    Et voilà, maintenant je suis sûr que Ursnif est bien caché dans le PID 2132 :p dans le processus de l'explorer windows !<br>
-                    Si vous voulez avoir plus d'information sur un processus, vous pouvez installer un plugin nommé psinfo :<br>
+                    Et voilà, maintenant je suis sûr que Ursnif est bien caché dans le PID 2132, dans le processus de l'explorer windows !<br>
+                    Si vous voulez avoir plus d'informations sur un processus, vous pouvez installer un plugin nommé psinfo :<br>
                     <code class="code">
                     Aller dans le répertoire de volatility<br>
                     &nbsp&nbspcd volatility/plugins/<br>
@@ -143,14 +149,16 @@
                 </p>
                 <img src="../../../images/procdump.PNG" alt="">
                 <p>
-                    Et voilà, j'ai récupérer l'exécutable que ursnif a infecté. Si vous ne trouver pas l'exploreur windows en tant que processus infecté cela est tout à fait normal. Ursnif 
+                    Et voilà, j'ai récupérer l'exécutable que ursnif a infecté. Si vous ne trouvez pas l'exploreur windows en tant que processus infecté cela est tout à fait normal. Ursnif 
                     s'injecte 
-                    principalement dans Internet Explorer étant donné qu'une de ses fonctions est le vol bancaire. Pour ma part il s'est injecter dans l'explorer windows.<br>
-                    Voilà, mon premier article se termine. Je tiens à remercier <a href="https://aassfxxx.infos.st/" target="_blank">aaSSfxxx</a> pour le sample utilisé lors de cette article.
-                     Vous pouvez le télécharger <a href="https://repo.aassfxxx.infos.st/misc/malware/ursnif/ursnif_1002.zip" target="_blank">ici</a> ( mot de passe : infected et le sample 
-                     est 1002.bin). Et n'hésiter pas à aller voir ses articles sur <a href="http://aassfxxx.infos.st/ursnif-analyse-du-loader.html" target="_blank">l'analyse d'ursnif</a>.
+                    principalement dans Internet Explorer étant donné qu'une de ses fonctions est le vol bancaire. Pour ma part il s'est injecté dans l'explorer windows.<br>
+                    Voilà, mon premier article se termine. Je tiens à remercier <a href="https://aassfxxx.infos.st/" target="_blank">aaSSfxxx</a> pour le sample utilisé lors de cette article
+                     et aussi <a href="https://inf0sec.fr/">Unknow101</a> pour son soutient.
+                     Vous pouvez télécharger le sample <a href="http://repo.aassfxxx.infos.st/misc/malware/ursnif/" target="_blank">ici</a> (archive : ursnif_1002.zip, mot de passe :
+                      infected et le sample 
+                     est 1002.bin). Et n'hésitez pas à aller voir ses articles sur <a href="http://aassfxxx.infos.st/ursnif-analyse-du-loader.html" target="_blank">l'analyse d'ursnif</a>.
                      <br>
-                     Sur ce, je vous souhaite une bonne journée et de chouettes analyses de vos dumps :p
+                     Sur ce, je vous souhaite une bonne journée et de chouettes analyses de vos dumps !
 
                 </p>
             </div>
