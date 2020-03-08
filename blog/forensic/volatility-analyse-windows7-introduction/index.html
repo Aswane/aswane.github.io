@@ -46,16 +46,16 @@
                 </p>
                 <img src="/images/vm-windows.PNG">
                 <p>
-                    Avant d'injecter le malware Ursnif, nous allons en premier regarder les bases de volatility.  Hop il faut suspendre la VM qui vient d'être configurée et récupérer le .vmem
+                    Avant d'injecter le malware Ursnif, nous allons en premier regarder les bases de volatility. Il faut suspendre la VM qui vient d'être configurée et récupérer le .vmem
                      contenue dans les dossiers de la machine ci-dessous .
-                        Un .vmem est un fichier que créer VMware permettant de capturer la mémoire vive lorsque l'on suspends la machine nous donnant plus facilement la possibilité
+                        Un .vmem est un fichier que créé VMware permettant de capturer la mémoire vive lorsque l'on suspends la machine nous donnant plus facilement la possibilité
                         d'analyser celle-ci.<br>
-                        Volatility est tout d'abord un outil de réponse aux incidents et d'analyse des logiciels malveillants. Il est aussi écrit en Python.<br>
+                        Volatility est avant tout un outil d’analyse inforensique permettant de parcourir la mémoire volatile (la RAM) à la recherche de traces illégitimes<br>
                         Son fonctionnement très simple nous permet une prise en main assez rapide, sans oublier qu'il peut être utilisé aussi bien en l'important
                         dans votre programme Python ou en ligne de commande. Pour notre utilisation, nous choisissons la ligne de commande qui est bien plus simple.
                         La structure est toujours la même :<br>
                         -f : le chemin de votre dump<br>
-                        puis ensuite le plugin utilisé
+                        puis en suite le plugin utilisé
                    <br><br>
                    <div class="code-content">
                         vol.exe -f win7.vmem imageinfo
@@ -64,7 +64,8 @@
                 <img src="/images/image-info.PNG">
                 <p>
                     Le plugin imageinfo nous permet d'avoir les informations importantes sur le dump mémoire.
-                    On remarque donc que volatility nous suggère plusieurs profiles, Win7SP1x64, Win7SP0x64 ... Par pur principe j'utilise le premier profile que volatility nous suggère
+                    On remarque donc que volatility nous suggère plusieurs profiles, Win7SP1x64, Win7SP0x64 ... si on ne connaît pas exactement la version du système d’exploitation ,
+                     il est recommandé de prendre le premier profile proposé 
                     .<br>
                     Un autre plugin, qui peut être lui aussi très utile est le plugin hashdump, il permet de récupérer le hash des utilisateurs.<br>
                     <div class="code-content">
@@ -83,8 +84,8 @@
                 <img src="../../../images/cmdline1.PNG" alt="">
                 <img src="../../../images/cmdline5.png" alt="">
                 <p>Ahh nous trouvons l'explorer windows.</p>
-                <img src="../../../images/cmdline3.png" alt="">
-                <p>On remarque aussi que Internet Explorer et le CMD étaient aussi ouverts lors du dump. ( Désolé pour le cribouillage Haha )</p>
+                <img src="../../../images/cmdline6.png" alt="">
+                <p>On remarque aussi que Internet Explorer et le CMD étaient aussi ouverts lors du dump.</p>
                 <img src="../../../images/vim-windows-gui.PNG"alt="">
                 <p>Et oui ! Internet Explorer, L'explorer windows et le CMD. Tout y est ! 
                     <br>
@@ -96,7 +97,7 @@
 
                 <!-- <div class="p-30"></div> -->  
                 ( l'échantillon d'ursnif est disponible en téléchargement <a href="http://repo.aassfxxx.infos.st/misc/malware/ursnif/" target="_blank">ici</a>, merci à aaSSfxxx ).<br>
-                    Puis ensuite redémarrer celle-ci pour s'assurer qu'Ursnif s'était bien injecté<br>
+                    Puis en suite redémarrer celle-ci pour s'assurer qu'Ursnif s'était bien injecté<br>
                     Pour commencer une analyse, l'utilisation du plugin netscan est très intéressante, en effet il permet de lister toutes les connexions
                     TCP/UDP en cours lors de la capture de la mémoire vive.
                   <br>
@@ -157,7 +158,7 @@ for pid in list_pid:<br>
                     </div>
                 </p>
                 <p>Il fonctionne comme la plupart des plugins, en spécifiant son nom puis en passant en paramètre le pid attaché au processus.<br>
-                Ensuite plus qu'a exécuter le script du dessus, qui va analyser tous les processus en cours lors du dump de la mémoire vive.
+                En suite , nous pouvons faire usage du script exposé ci-dessous afin d’analyser tout les processus de la machine et peut être déterminer la présence du malware.
                 </p>
                 <img src="../../../images/scan.PNG" alt="">
                 <p>
@@ -194,7 +195,7 @@ for pid in list_pid:<br>
                 </p>
                 <img src="../../../images/cmdline4.PNG" alt="">
                 <p>
-                    Etant donné que nous sommes en possession du PID attaché au processus malveillant d'Ursnif, il nous reste une dernière chose à effectuer pour ensuite pouvoir analyser
+                    Etant donné que nous sommes en possession du PID attaché au processus malveillant d'Ursnif, il nous reste une dernière chose à effectuer pour en suite pouvoir analyser
                     l'exécutable sans difficulté.
                     Pour cela, le plugin procdump est disponible :
                     <div class="code-content">
