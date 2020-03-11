@@ -602,5 +602,15 @@ a:hover {
 
 
 h1.blog-h1 {
-  font-size: 3em;
+	font-size: 3em;
 }
+
+div.information-post p {
+	font-style: italic;
+	text-align: left;
+	color: rgba(0, 0, 0, 0.7);
+}
+
+
+
+
